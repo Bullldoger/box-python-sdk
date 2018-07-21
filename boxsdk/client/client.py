@@ -13,6 +13,7 @@ from ..object.events import Events
 from ..object.file import File
 from ..object.group import Group
 from ..object.group_membership import GroupMembership
+from ..object.file_version import FileVersion
 from ..util.shared_link import get_shared_link_header
 from ..util.translator import Translator
 
@@ -391,3 +392,19 @@ class Client(object):
         """
         # pylint:disable=no-self-use
         return self._session.get_url(endpoint, *args)
+
+
+    def file_version(self, version_id):
+        """
+        Initialize a :class: `FileVersion` object, whose box id is version_id.
+
+        :param version_id:
+            The version ID of the :class:`LegalHoldPolicyAssignment` object.
+        :type version_id:
+            `unicode`
+        :return:
+            A :class `FileVersion` object with the given entry ID.
+        :rtype:
+            :class:`FileVersion`
+        """
+        return FileVersion(session=self._session, object_id=version_id)

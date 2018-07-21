@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 from boxsdk.config import API
 from .item import Item
 from .metadata import Metadata
+from ..pagination.limit_offset_based_object_collection import LimitOffsetBasedObjectCollection
 
 
 class File(Item):
@@ -289,3 +290,56 @@ class File(Item):
             password=password,
         )
         return item.shared_link['download_url']
+
+
+    def versions(self, fields=None, offset=None, limit=None):
+        """
+        Get the entries in the file version using limit-offset paging.
+
+        :param limit:
+            The maximum number of entries to return per page. If not specified, then will use the server-side default.
+        :type limit:
+            `int` or None
+        :param offset:
+            The offset of the item at which to begin the response.
+        :type offset:
+            `str` or None
+        :param fields:
+            List of fields to request.
+        :type fields:
+            `Iterable` of `unicode`
+        :returns:
+            An iterator of the entries in the legal hold policy
+        :rtype:
+            :class:`BoxObjectCollection`
+        """
+        return LimitOffsetBasedObjectCollection(
+            session=self._session,
+            url='{0}/files/{1}/versions'.format(API.BASE_API_URL, self.object_id),
+            limit=limit,
+            offset=offset,
+            fields=fields,
+            return_full_pages=False
+        )
+
+
+    def promote_version(self, version_id):
+        """
+        Copy a previous file version and make it the current version of the file.
+
+        :param version_id:
+            The id of the version to make current.
+        :type version_id:
+            `unicode`
+        """
+        url = '{0}/files/{1}/versions/current'.format(API.BASE_API_URL, self.object_id)
+        body = {
+            'type': 'file_version',
+            'id': version_id
+        }
+        response = self._session.post(url, data=json.dumps(body)).json()
+        return Translator().translate(response['type'])(
+            self._session,
+            response['id'],
+            response,
+        )
