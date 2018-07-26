@@ -13,8 +13,10 @@ from ..object.events import Events
 from ..object.file import File
 from ..object.group import Group
 from ..object.group_membership import GroupMembership
+from ..object.metadata_template import MetadataTemplate
 from ..util.shared_link import get_shared_link_header
 from ..util.translator import Translator
+from ..pagination.marker_based_object_collection import MarkerBasedObjectCollection
 
 
 class Client(object):
@@ -391,3 +393,102 @@ class Client(object):
         """
         # pylint:disable=no-self-use
         return self._session.get_url(endpoint, *args)
+
+
+    def metadata_template(self, template_id):
+        """
+        Initialize a :class:`MetadataTemplate` object, whose box id is template_id.
+
+        :param template_id:
+            The box id of the :class:`MetadataTemplate` object.
+        :type template_id:
+            `unicode`
+        :return:
+            A :class:`MetadataTemplate` object with the given template id.
+        :rtype:
+            :class:`MetadataTemplate`
+        """
+        return MetadataTemplate(session=self._session, object_id=template_id)
+
+
+    def create_metadata_template(
+            self,
+            scope,
+            display_name,
+            fields_type,
+            fields_display_name,
+            options_key,
+            is_hidden=None,
+            fields_key=None,
+            fields_options=None,
+            template_key=None,
+    ):
+        url = '{0}/metadata_templates/schema'.format(API.BASE_API_URL)
+        body = {
+            'scope': scope,
+            'templateKey': template_key,
+            'hidden': is_hidden,
+            'displayName': display_name,
+            'fields': {
+                'type': fields_type,
+                'key': fields_key,
+                'displayName': fields_display_name,
+                'options': fields_options
+            },
+            'options':{
+                'key': options_key
+            }
+        }
+        box_response = self._session.post(url, data=json.dumps(body))
+        response = box_response.json()
+        return MetadataTemplate(self._session, response['id'], response)
+
+
+    def metadata_templates(self, scope, marker=None, limit=None, fields=None):
+        """
+        Get the entries in the metadata templates using marker based paging.
+
+        :param scope:
+            The scope of the metadata templates to return.
+        :type scope:
+            `str` or None
+        :param limit:
+            The maximum number of entries to return per page. If not specified, then will use the server-side default.
+        :type limit:
+            `int` or None
+        :param marker:
+            The paging marker to start paging from.
+        :type marker:
+            `str` or None
+        :param fields:
+            List of fields to request.
+        :type fields:
+            `Iterable` of `unicode`
+        :returns:
+            An iterator of the entries in the metadata template
+        :rtype:
+            :class:`BoxObjectCollection`
+        """
+        return MarkerBasedObjectCollection(
+            session=self._session,
+            url='{0}/metadata_templates/{1}'.format(API.BASE_API_URL, scope),
+            limit=limit,
+            marker=marker,
+            fields=fields,
+            return_full_pages=False
+        )
+
+
+    def get_metadata_template_by_id(self, template_id):
+        url = '{0}/metadata_templates/{1}'.format(API.BASE_API_URL, template_id)
+        box_response = self._session.get(url)
+        response = box_response.json()
+        return MetadataTemplate(self._session, response['id'], response)
+
+
+    def get_metadata_template_by_name(self, scope, template):
+        url = '{0}/metadata_templates/{1}/{2}/schema'.format(API.BASE_API_URL, scope, template)
+        box_response = self._session.get(url)
+        response = box_response.json()
+        return MetadataTemplate(self._session, response['id'], response)
+
