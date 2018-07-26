@@ -479,15 +479,8 @@ class Client(object):
         )
 
 
-    def get_metadata_template_by_id(self, template_id):
-        url = '{0}/metadata_templates/{1}'.format(API.BASE_API_URL, template_id)
-        box_response = self._session.get(url)
-        response = box_response.json()
-        return MetadataTemplate(self._session, response['id'], response)
-
-
-    def get_metadata_template_by_name(self, scope, template):
-        url = '{0}/metadata_templates/{1}/{2}/schema'.format(API.BASE_API_URL, scope, template)
+    def get_metadata_template_by_key(self, scope, template_key):
+        url = '{0}/metadata_templates/{1}/{2}/schema'.format(API.BASE_API_URL, scope, template_key)
         box_response = self._session.get(url)
         response = box_response.json()
         return MetadataTemplate(self._session, response['id'], response)
