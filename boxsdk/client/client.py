@@ -409,7 +409,21 @@ class Client(object):
             :class:`MetadataTemplate`
         """
         return MetadataTemplate(session=self._session, object_id=template_id)
+# static method on metadata template to act as an alternative constructor 
+# two static methods 
 
+    def __init__(self, session, object_id, response_object=None):
+    class MetadataTemplate(BaseObject):
+        def __init__(self, object_id, response_boject=None, scope=None, template=None):
+
+            @classmethod
+            def create_by_scope_and_tempalte(cls, scope, tempalte, response_object=None):
+                return cls(object_id=None, response_object=response_object, scope=scope, tempalte=template)
+
+    MetadataTemplate('foo')
+    MetadataTemplate('foo', scope='scope', template='template')
+    MetadataTemplate(object_id=None, scope='scope', tempalte='template')
+    MetadataTEmpalte.create_by_scope_and_response()
 
     def create_metadata_template(
             self,
