@@ -343,3 +343,24 @@ class File(Item):
             response['id'],
             response,
         )
+
+    def delete_previous_version(self, version_id, if_match=None):
+        """
+        Permanently delete an item that is in the trash. The item will no longer exist in Box.
+
+        :param version_id:
+            The id of the previous file version to delete.
+        :type version_id:
+            `unicode`
+        :param if_match:
+            The `etag` of the file
+        :type if_match:
+            `unicode` or None
+        """
+        url = self.get_url('versions', version_id)
+        headers = {}
+        if if_match is not None:
+            headers['if_match'] = if_match
+        box_response = self._session.delete(url, expect_json_response=False, headers=headers)
+        return box_response.ok
+
